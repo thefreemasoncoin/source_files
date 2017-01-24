@@ -1,7 +1,4 @@
-﻿For lodges that want to setup there own node/server freemasoncoin daemon... Here are the directions for a linux based system that works from (coincreator.net)
-
-
-
+﻿
 
 #Setting up a linux daemon (coincreator.net)
 In this guide a linux daemon will be build and set up to an Amazon EC2 Ubuntu micro instance and later we will connect to the node using the Windows wallet. Setting up an Amazon micro instance is free and it should handle dozens of connections easily.
