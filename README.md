@@ -1,82 +1,90 @@
-Bitcoin integration/staging tree
-================================
+﻿#Setting up a linux daemon (coincreator.net)
+In this guide a linux daemon will be build and set up to an Amazon EC2 Ubuntu micro instance and later we will connect to the node using the Windows wallet. Setting up an Amazon micro instance is free and it should handle dozens of connections easily.
 
-http://www.bitcoin.org
+ However, it should be noted that the public IP of the instance will change if you restart the instance. For a more "permanent" solution you should have a static permanent IP that won't change. (Amazon offers e.g. "elastic ip's") 
 
-Copyright (c) 2009-2013 Bitcoin Developers
+ A coin named BullshitCoin will be used as a demonstration. purpose.
 
-What is Bitcoin?
-----------------
+##Prerequisities
+A coin has been created using our services. This means you must have the access to the source codes and the windows binary.
+![](https://raw.github.com/coincreator/tutorials/master/tutorials/LinuxDaemonHosting/coindetails.png)
+ 
+.
 
-Bitcoin is an experimental new digital currency that enables instant payments to
-anyone, anywhere in the world. Bitcoin uses peer-to-peer technology to operate
-with no central authority: managing transactions and issuing money are carried
-out collectively by the network. Bitcoin is also the name of the open source
-software which enables the use of this currency.
 
-For more information, as well as an immediately useable, binary version of
-the Bitcoin client software, see http://www.bitcoin.org.
 
-License
--------
+Create a new Ubuntu Server 12.04 32-bit micro instance. If you choose any other distribution, this guide may not work.
+![](https://raw.github.com/coincreator/tutorials/master/tutorials/LinuxDaemonHosting/chooseinstance.png)
+ 
+.
 
-Bitcoin is released under the terms of the MIT license. See `COPYING` for more
-information or see http://opensource.org/licenses/MIT.
 
-Development process
--------------------
 
-Developers work in their own trees, then submit pull requests when they think
-their feature or bug fix is ready.
+Open the P2P port of your coin from the "security groups". Port 22 should also be open by default so you can connect to your instance with SSH.
+![](https://raw.github.com/coincreator/tutorials/master/tutorials/LinuxDaemonHosting/openp2p.png)
+ 
+.
 
-If it is a simple/trivial/non-controversial change, then one of the Bitcoin
-development team members simply pulls it.
 
-If it is a *more complicated or potentially controversial* change, then the patch
-submitter will be asked to start a discussion (if they haven't already) on the
-[mailing list](http://sourceforge.net/mailarchive/forum.php?forum_name=bitcoin-development).
 
-The patch will be accepted if there is broad consensus that it is a good thing.
-Developers should expect to rework and resubmit patches if the code doesn't
-match the project's coding conventions (see `doc/coding.md`) or are
-controversial.
 
-The `master` branch is regularly built and tested, but is not guaranteed to be
-completely stable. [Tags](https://github.com/bitcoin/bitcoin/tags) are created
-regularly to indicate new official, stable release versions of Bitcoin.
+Connect to the linux instance with SSH
 
-Testing
--------
+![](https://raw.github.com/coincreator/tutorials/master/tutorials/LinuxDaemonHosting/shellopen.png)
+ 
 
-Testing and code review is the bottleneck for development; we get more pull
-requests than we can review and test. Please be patient and help out, and
-remember this is a security-critical project where any mistake might cost people
-lots of money.
+.
 
-### Automated Testing
 
-Developers are strongly encouraged to write unit tests for new code, and to
-submit new unit tests for old code.
+Install dependencies required to build the coin daemon
 
-Unit tests for the core code are in `src/test/`. To compile and run them:
+    sudo apt-get update
+	sudo apt-get install build-essential libboost-all-dev libcurl4-openssl-dev libdb5.1-dev libdb5.1++-dev make
 
-    cd src; make -f makefile.unix test
+Download and unpack the source codes of your coin
 
-Unit tests for the GUI code are in `src/qt/test/`. To compile and run them:
+    cd
+    mkdir coin && cd coin
+    wget http://voimariini.s3.amazonaws.com/53247199f98396855ee9e4e2/src-linux.tar.gz
+    tar xvf src-linux.tar.gz
+    
+Compile the coin daemon
 
-    qmake BITCOIN_QT_TEST=1 -o Makefile.test bitcoin-qt.pro
-    make -f Makefile.test
-    ./bitcoin-qt_test
+    cd ~/coin/src/
+    make -f makefile.unix "USE_UPNP=-"
 
-Every pull request is built for both Windows and Linux on a dedicated server,
-and unit and sanity tests are automatically run. The binaries produced may be
-used for manual QA testing — a link to them will appear in a comment on the
-pull request posted by [BitcoinPullTester](https://github.com/BitcoinPullTester). See https://github.com/TheBlueMatt/test-scripts
-for the build/test scripts.
+Create a conf file
 
-### Manual Quality Assurance (QA) Testing
+    echo -e "rpcuser=user\nrpcpassword=passowrd\ndaemon=1" >> coin.conf
 
-Large changes should have a test plan, and should be tested by somebody other
-than the developer who wrote the code.
+Start the daemon
 
-See https://github.com/bitcoin/QA/ for how to create a test plan.
+    ./litecoind
+
+Let's check the p2p is open
+
+    netstat -lnt 
+
+![](checkp2popen.png)
+ 
+.
+
+
+###Now it's time to connect to the server using the Windows wallet!
+
+Add the public ip of your Amazon instance to the conf file the Windows wallet uses
+
+![](https://raw.github.com/coincreator/tutorials/master/tutorials/LinuxDaemonHosting/addnodeip.png)
+ 
+.
+
+
+Now start the Windows wallet!
+
+You can verify from the linux side that indeed someone has connected to your node.
+
+    ./litecoind getinfo
+
+![](https://raw.github.com/coincreator/tutorials/master/tutorials/LinuxDaemonHosting/1connection.png)
+
+That's it!
